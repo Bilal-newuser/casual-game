@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınıfta Aşık Etme Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Bilgi Paneli -->
+        <div id="ui-panel">
+            <div id="timer">Kalan Süre: 10:00</div>
+            <div id="score">Aşık Edilen: 0 / 39</div>
+        </div>
+
+        <!-- Öğretmen ve Tahta Alanı -->
+        <div id="front-class">
+            <div id="blackboard">
+                <span>MATEMATİK DERSİ</span>
+                <small>2 + 2 = 4 | x² + y² = z²</small>
+            </div>
+            <div id="teacher-area">
+                <div id="teacher" class="teaching">
+                    <div class="teacher-head">
+                        <div class="teacher-eyes"></div>
+                    </div>
+                    <div class="teacher-body"></div>
+                </div>
+                <div id="teacher-status">Öğretmen Ders Anlatıyor</div>
+            </div>
+            <div id="warning-msg" class="hidden">⚠️ ÖĞRETMEN DÖNÜYOR!</div>
+        </div>
+
+        <!-- Sınıf ve Sıralar -->
+        <div id="classroom">
+            <!-- Oyuncu Kız -->
+            <div id="player-desk">
+                <div id="player" class="girl-model">
+                    <div class="eye-beam left-beam"></div>
+                    <div class="eye-beam right-beam"></div>
+                    <div class="head">
+                        <div class="hair"></div>
+                        <div class="eyes"></div>
+                        <div class="smile"></div>
+                    </div>
+                    <div class="body"></div>
+                </div>
+                <div class="desk-label">SEN</div>
+            </div>
+
+            <!-- 39 Erkek Öğrenci Grid -->
+            <div id="boys-grid"></div>
+        </div>
+    </div>
+
+    <!-- Oyun Sonu Ekranı -->
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title">Oyun Bitti!</h2>
+            <p id="modal-msg"></p>
+            <button onclick="location.reload()">Yeniden Başla</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

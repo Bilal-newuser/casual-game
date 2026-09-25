@@ -1,0 +1,338 @@
+body {
+    font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+    background-color: #1e272e;
+    color: white;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+}
+
+#game-container {
+    width: 950px;
+    background-color: #353b48;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 4px solid #485460;
+}
+
+#ui-panel {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #00d2d3, #54a0ff);
+    padding: 12px 25px;
+    border-radius: 10px;
+    color: #1e272e;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#front-class {
+    position: relative;
+    background: #2f3640;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border: 3px solid #718093;
+}
+
+#blackboard {
+    background: #10ac84;
+    padding: 15px;
+    font-weight: bold;
+    border: 6px solid #8395a7;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* Öğretmen Modeli ve Animasyonları */
+#teacher-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#teacher {
+    width: 50px;
+    height: 70px;
+    position: relative;
+    transition: transform 0.5s ease;
+}
+
+.teacher-head {
+    width: 36px;
+    height: 36px;
+    background: #ffdd59;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    border: 2px solid #d2dae2;
+}
+
+.teacher-eyes {
+    width: 8px;
+    height: 8px;
+    background: #1e272e;
+    border-radius: 50%;
+    position: absolute;
+    top: 12px;
+    left: 8px;
+    box-shadow: 12px 0 #1e272e;
+    transition: all 0.3s;
+}
+
+.teacher-body {
+    width: 44px;
+    height: 32px;
+    background: #ff5e57;
+    border-radius: 10px 10px 0 0;
+    margin: 2px auto 0;
+}
+
+/* Öğretmen Dönme Animasyonu */
+#teacher.watching {
+    transform: rotate(180deg);
+}
+
+#teacher.watching .teacher-head {
+    background: #ff3838;
+}
+
+#teacher-status {
+    margin-top: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #485460;
+}
+
+#warning-msg {
+    color: #ffdd59;
+    font-weight: bold;
+    font-size: 1.2rem;
+    animation: blink 0.4s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.3; transform: scale(1.05); }
+}
+
+#classroom {
+    display: flex;
+    gap: 20px;
+    background: #2f3640;
+    padding: 20px;
+    border-radius: 12px;
+    position: relative;
+}
+
+/* Kız Modeli (Oyuncu) */
+#player-desk {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #57606f;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #ff4757;
+}
+
+.girl-model {
+    width: 50px;
+    height: 65px;
+    position: relative;
+}
+
+.girl-model .head {
+    width: 32px;
+    height: 32px;
+    background: #ffcd94;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.girl-model .hair {
+    width: 36px;
+    height: 20px;
+    background: #ff4757;
+    border-radius: 20px 20px 0 0;
+    position: absolute;
+    top: -2px;
+    left: -2px;
+}
+
+.girl-model .body {
+    width: 38px;
+    height: 30px;
+    background: #ff6b81;
+    border-radius: 8px 8px 0 0;
+    margin: 2px auto 0;
+}
+
+/* Gözlerden Çıkan Pembe Aşk Işınları */
+.eye-beam {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, #ff4757, #ff6b81);
+    box-shadow: 0 0 8px #ff4757;
+    border-radius: 2px;
+    z-index: 100;
+    display: none;
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+/* Erkek Modelleri Grid */
+#boys-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+    flex-grow: 1;
+}
+
+.boy-card {
+    position: relative;
+    background: #485460;
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    border: 2px solid #718093;
+}
+
+.boy-card:hover {
+    transform: scale(1.08);
+    border-color: #1e90ff;
+}
+
+.boy-model {
+    width: 36px;
+    height: 45px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.boy-head {
+    width: 24px;
+    height: 24px;
+    background: #ffcd94;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.boy-hair {
+    width: 26px;
+    height: 10px;
+    background: #2f3542;
+    border-radius: 10px 10px 0 0;
+    position: absolute;
+    top: -1px;
+    left: -1px;
+}
+
+.boy-body {
+    width: 30px;
+    height: 20px;
+    background: #1e90ff;
+    border-radius: 6px 6px 0 0;
+    margin: 1px auto 0;
+}
+
+/* Öğretmen Baktığında Ders Çalışma Durumu */
+.studying .boy-model {
+    transform: translateY(6px) rotate(15deg); /* Sıraya eğilip ders çalışıyor */
+}
+
+/* Aşık Olmuş Erkek Modeli */
+.boy-card.in-love {
+    background: #ffb8b8;
+    border-color: #ff4757;
+}
+
+.boy-card.in-love .boy-body {
+    background: #ff4757;
+}
+
+.boy-card.in-love::after {
+    content: "😍";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.3rem;
+    animation: heartBeat 0.6s infinite alternate;
+}
+
+@keyframes heartBeat {
+    from { transform: scale(1); }
+    to { transform: scale(1.25); }
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 5px;
+    background: #2f3640;
+    border-radius: 3px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff6b81, #ff4757);
+    transition: width 0.1s linear;
+}
+
+.hidden { display: none !important; }
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #2f3640;
+    color: white;
+    padding: 35px;
+    border-radius: 15px;
+    text-align: center;
+    border: 3px solid #ff4757;
+    box-shadow: 0 0 20px #ff4757;
+}
+
+.modal-content button {
+    padding: 12px 25px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 15px;
+}
