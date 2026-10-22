@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelin'in Aşk Sınavı - Lise Son Sınıf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap');
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .game-font {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        /* Pulse animation for teacher alert */
+        @keyframes alert-pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.8)); }
+            50% { transform: scale(1.25); filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1)); }
+        }
+
+        .alert-active {
+            animation: alert-pulse 0.5s infinite;
+        }
+
+        /* Floating Heart Particles */
+        .heart-particle {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 1.2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.4) rotate(20deg); }
+        }
+
+        /* Chalkboard Texture */
+        .chalkboard {
+            background-color: #234d37;
+            border: 8px solid #854d0e;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden">
+
+    <!-- GAME CONTAINER -->
+    <div class="relative w-full max-w-4xl bg-amber-50 rounded-2xl shadow-2xl overflow-hidden border-4 border-amber-800 flex flex-col h-[90vh] max-h-[820px]">
+        
+        <!-- TOP HUD / SCOREBOARD -->
+        <div class="bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 px-4 py-3 text-white flex justify-between items-center z-20 shadow-md">
+            <!-- Pelin Info & How to Play Button -->
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-pink-100 rounded-full border-2 border-white flex items-center justify-center text-2xl shadow">
+                    👩‍🦰
+                </div>
+                <div>
+                    <h1 class="game-font text-lg sm:text-xl text-yellow-300 leading-tight">Pelin'in Aşk Sınavı</h1>
+                    <p class="text-xs text-pink-100">Sınıftaki Tek Kız 💖</p>
+                </div>
+            </div>
+
+            <!-- Score & Timer & Menu Buttons -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Score -->
+                <div class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl border border-white/30 text-center">
+                    <span class="text-[10px] uppercase tracking-wider block text-pink-100 font-bold">Aşık Olanlar</span>
+                    <span id="scoreText" class="game-font text-xl sm:text-2xl text-yellow-300">0</span>
+                </div>
+
+                <!-- High Score -->
+                <div class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl border border-white/30 text-center hidden sm:block">
+                    <span class="text-[10px] uppercase tracking-wider block text-pink-100 font-bold">En Yüksek</span>
+                    <span id="highScoreText" class="game-font text-xl sm:text-2xl text-amber-200">0</span>
+                </div>
+
+                <!-- Timer -->
+                <div class="bg-white/20 backdrop-blur-md px-3 sm:px-4 py-1 rounded-xl border border-white/30 text-center">
+                    <span class="text-[10px] uppercase tracking-wider block text-pink-100 font-bold">Kalan Süre</span>
+                    <span id="timerText" class="game-font text-xl sm:text-2xl text-white">03:00</span>
+                </div>
+
+                <!-- How to Play Button -->
+                <button onclick="openHowToPlayModal()" class="bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold px-3 py-1.5 rounded-xl border border-yellow-200 text-xs shadow transition active:scale-95 flex items-center space-x-1" title="Nasıl Oynanır?">
+                    <i class="fas fa-question-circle text-sm"></i>
+                    <span class="hidden md:inline">Nasıl Oynanır?</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TEACHER AREA & CLASSROOM FRONT -->
+        <div class="relative h-40 bg-amber-100 border-b-4 border-amber-700 p-3 flex justify-between items-end overflow-hidden">
+            <!-- Chalkboard -->
+            <div class="chalkboard w-1/3 h-28 rounded-lg p-2 text-xs text-emerald-100 font-mono relative hidden sm:block">
+                <p>📐 Matematik Ders:</p>
+                <p class="mt-1 text-yellow-200">f(x) = Aşk³ + Kalp²</p>
+                <p class="mt-1 text-pink-200">Pelin = 100/100 ⭐</p>
+            </div>
+
+            <!-- Teacher Sprite & Status -->
+            <div class="relative flex flex-col items-center mx-auto sm:mx-0">
+                <!-- Teacher Warning Bubble -->
+                <div id="teacherAlert" class="hidden absolute -top-12 bg-red-600 text-white font-extrabold text-xl px-3 py-1 rounded-full border-2 border-white alert-active z-30 shadow-lg">
+                    ⚠️ ŞÜPHELENDİ! (!)
+                </div>
+                
+                <!-- Teacher Visual -->
+                <div id="teacherContainer" class="relative transition-all duration-300 transform scale-110">
+                    <div id="teacherSprite" class="w-16 h-20 bg-amber-800 rounded-t-full border-2 border-amber-950 flex flex-col items-center justify-center relative shadow-lg">
+                        <!-- Glasses / Head -->
+                        <div id="teacherHead" class="w-10 h-10 bg-orange-200 rounded-full border border-amber-900 absolute -top-6 flex items-center justify-center text-lg">
+                            👴
+                        </div>
+                        <span class="text-xs text-white font-bold mt-2">Hoca</span>
+                    </div>
+                </div>
+
+                <!-- Teacher Status Banner -->
+                <div id="teacherStatusText" class="mt-1 text-xs font-bold px-2 py-0.5 rounded bg-emerald-600 text-white shadow">
+                    Tahtaya Yazı Yazıyor...
+                </div>
+            </div>
+
+            <!-- Classroom Rules Notice Board -->
+            <div class="bg-amber-200 border-2 border-amber-600 p-2 rounded text-[10px] text-amber-900 w-1/4 hidden sm:block">
+                <p class="font-bold border-b border-amber-400 mb-1">ÖĞRETMEN UYARISI:</p>
+                <p>Rastgele aralıklarla (4, 5, 6, 7 veya 9 saniye) arkasını döner!</p>
+            </div>
+        </div>
+
+        <!-- CLASSROOM DESKS & MALE STUDENTS GRID -->
+        <div class="flex-1 bg-amber-200/60 p-4 relative overflow-y-auto flex flex-col justify-around">
+            <div class="text-center text-xs font-bold text-amber-800/60 uppercase tracking-widest mb-1">
+                -- Sınıf Sıraları (Öğrenciye 6 Saniye Basılı Tut!) --
+            </div>
+
+            <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 max-w-3xl mx-auto w-full">
+                <!-- Student desks will be dynamically rendered here -->
+            </div>
+        </div>
+
+        <!-- BOTTOM HUD & CHAT LINK BAR -->
+        <div class="bg-amber-900 text-amber-100 text-xs py-2 px-4 flex flex-wrap justify-between items-center gap-2 border-t-2 border-amber-950">
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-400 inline-block animate-ping"></span>
+                <span><b>Kural:</b> 6s basılı tut, hoca bakınca bırak!</span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- External Chat Link Button -->
+                <button onclick="openChatLinkModal()" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-3 py-1 rounded border border-pink-400 transition text-xs flex items-center space-x-1.5 shadow" title="Sohbet Bağlantısı">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Sohbet Linki</span>
+                </button>
+
+                <!-- Sound Toggle -->
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="bg-amber-800 hover:bg-amber-700 text-white px-3 py-1 rounded border border-amber-600 transition text-xs">
+                    <i class="fas fa-volume-up mr-1"></i> Ses: Açık
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL OVERLAYS -->
+
+        <!-- START SCREEN -->
+        <div id="startOverlay" class="absolute inset-0 bg-slate-900/90 backdrop-blur-md z-40 flex flex-col items-center justify-center p-6 text-center">
+            <div class="w-20 h-20 bg-pink-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg border-4 border-white animate-bounce">
+                💖
+            </div>
+            <h2 class="game-font text-3xl sm:text-4xl text-pink-400 mb-2">Pelin'in Aşk Sınavı</h2>
+            <p class="text-gray-200 max-w-md text-sm mb-6 leading-relaxed">
+                Pelin lise son sınıftaki tek kızdır! 3 dakika içerisinde sınıftaki tüm erkekleri kendine aşık etmeye çalış. 
+                Erkeklerin üzerine <span class="text-pink-300 font-bold">6 saniye basılı tutarak</span> kalplerini çal!
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="startGame()" class="game-font bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xl px-8 py-3 rounded-full shadow-xl transform active:scale-95 transition border-2 border-pink-300">
+                    OYUNA BAŞLA 🚀
+                </button>
+                <button onclick="openHowToPlayModal()" class="game-font bg-slate-700 hover:bg-slate-600 text-yellow-300 text-lg px-6 py-3 rounded-full shadow-xl transform active:scale-95 transition border border-slate-500">
+                    ❓ NASIL OYNANIR?
+                </button>
+            </div>
+            
+            <button onclick="openChatLinkModal()" class="mt-4 text-xs text-pink-300 hover:text-pink-200 underline flex items-center space-x-1">
+                <i class="fas fa-link"></i>
+                <span>Sohbet Geçmişi / Konuşma Linkini Aç</span>
+            </button>
+        </div>
+
+        <!-- HOW TO PLAY MODAL -->
+        <div id="howToPlayModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div class="bg-white text-slate-900 rounded-2xl p-6 max-w-md w-full border-4 border-yellow-500 shadow-2xl relative text-left">
+                <button onclick="closeHowToPlayModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-bold">
+                    ✖
+                </button>
+                <div class="flex items-center space-x-2 border-b-2 border-yellow-200 pb-2 mb-4">
+                    <span class="text-3xl">📖</span>
+                    <h3 class="game-font text-2xl text-amber-700">Nasıl Oynanır?</h3>
+                </div>
+                
+                <div class="space-y-3 text-sm text-gray-700 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+                    <div class="flex items-start space-x-3 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                        <span class="text-2xl">1️⃣</span>
+                        <div>
+                            <p class="font-bold text-amber-900">Erkek Öğrenciye Basılı Tut:</p>
+                            <p>Sıradaki erkek öğrencilerden birinin üzerine tıklayıp <b>6 saniye</b> boyunca basılı tut. Kalp barı dolunca sana aşık olur!</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-3 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                        <span class="text-2xl">2️⃣</span>
+                        <div>
+                            <p class="font-bold text-red-900">Öğretmen Durumu (Rastgele Süreler):</p>
+                            <p>Öğretmen tahtaya bakarken sorun yok. Ancak öğretmen rastgele <b>4, 5, 6, 7 veya 9 saniyede bir</b> arkasını döner! Kafasında <b>"!"</b> çıktığında basılı tutmayı hemen bırak!</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-3 bg-pink-50 p-2.5 rounded-lg border border-pink-200">
+                        <span class="text-2xl">3️⃣</span>
+                        <div>
+                            <p class="font-bold text-pink-900">Süre ve Rekor:</p>
+                            <p>Toplam süren <b>3 Dakika (180s)</b>! Yakalanmadan en fazla sayıda öğrenciyi kendine aşık ederek rekor kır!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <button onclick="closeHowToPlayModal()" class="game-font bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-xl text-lg shadow transition">
+                        ANLADIM, TAMAM 👍
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHAT CONVERSATION DIRECT LINK MODAL -->
+        <div id="chatLinkModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div class="bg-white text-slate-900 rounded-2xl p-6 max-w-md w-full border-4 border-pink-500 shadow-2xl relative text-left">
+                <button onclick="closeChatLinkModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-bold">
+                    ✖
+                </button>
+                <div class="flex items-center space-x-2 border-b-2 border-pink-200 pb-2 mb-4">
+                    <span class="text-3xl">🔗</span>
+                    <h3 class="game-font text-2xl text-pink-600">Sohbet Geçmişi Linki</h3>
+                </div>
+
+                <p class="text-sm text-gray-700 mb-4 leading-relaxed">
+                    Aşağıdaki butona tıklayarak bu oyunun yapım aşamasındaki sohbet geçmişine doğrudan gidebilir veya kendi paylaşım linkini kaydedebilirsin:
+                </p>
+
+                <!-- URL INPUT & VISIT LINK BUTTON -->
+                <div class="space-y-3 mb-4">
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Sohbet URL Bağlantısı</label>
+                    <div class="flex items-center space-x-2">
+                        <input id="chatUrlInput" type="url" class="w-full text-xs p-2.5 rounded-xl border-2 border-pink-300 focus:border-pink-500 outline-none font-mono bg-slate-50" readonly />
+                        <button onclick="copyChatLink()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs px-3 py-2.5 rounded-xl border border-gray-400 font-bold transition flex items-center space-x-1" title="Linki Kopyala">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-2 pt-2">
+                        <a id="directChatAnchor" href="#" target="_blank" rel="noopener noreferrer" class="game-font bg-pink-600 hover:bg-pink-700 text-white text-center py-2.5 rounded-xl text-sm shadow transition flex items-center justify-center space-x-2">
+                            <span>Sohbete Git (Yeni Sekmede Aç)</span>
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+
+                        <button onclick="editCustomChatUrl()" class="text-xs text-slate-500 hover:text-slate-800 underline text-center">
+                            🔗 Farklı bir sohbet linki tanımla
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center pt-2 border-t border-gray-200">
+                    <button onclick="closeChatLinkModal()" class="text-xs font-bold text-slate-500 hover:text-slate-800">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center">
+            <div id="finalBadgeIcon" class="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center text-5xl mb-4 shadow-xl border-4 border-white">
+                👑
+            </div>
+            <h2 class="game-font text-3xl sm:text-4xl text-yellow-400 mb-1">Süre Doldu!</h2>
+            <p id="finalRankTitle" class="text-pink-300 game-font text-xl mb-4">Aşk Kraliçesi</p>
+            
+            <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 w-full max-w-xs mb-6 text-center shadow-inner">
+                <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Toplam Aşık Edilen Erkek</p>
+                <p id="finalScore" class="game-font text-5xl text-pink-400">0</p>
+                <p id="highScoreNotice" class="text-xs text-yellow-300 font-bold mt-1 hidden">🎉 Yeni En Yüksek Skor!</p>
+                <p id="finalComment" class="text-xs text-gray-300 mt-2 italic">"Tüm okul Pelin'i konuşuyor!"</p>
+            </div>
+
+            <button onclick="startGame()" class="game-font bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xl px-8 py-3 rounded-full shadow-xl transform active:scale-95 transition border-2 border-emerald-300">
+                YENİDEN OYNA 🔄
+            </button>
+        </div>
+
+        <!-- CAUGHT DISCIPLINE WARNING MODAL -->
+        <div id="caughtModal" class="hidden absolute inset-0 bg-red-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white text-slate-900 rounded-2xl p-6 max-w-sm text-center border-4 border-red-600 shadow-2xl animate-bounce">
+                <div class="text-5xl mb-2">👨‍🏫💥</div>
+                <h3 class="game-font text-2xl text-red-600 mb-1">YAKALANDIN!</h3>
+                <p class="text-sm text-gray-700 mb-4">
+                    Öğretmen derste flört ettiğini gördü! Disiplin uyarısı aldın ve puan kaybettin!
+                </p>
+                <button onclick="closeCaughtModal()" class="game-font bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl text-lg shadow transition">
+                    Özür Dilerim Hocam 😞
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- AUDIO & GAME SCRIPT -->
+    <script>
+        // GAME STATE CONSTANTS & VARIABLES
+        const GAME_DURATION = 180; // 3 minutes in seconds
+        const FLIRT_REQUIRED_TIME = 6; // 6 seconds needed to enamor
+        const TOTAL_DESKS = 6;
+
+        // Teacher Intervals strictly chosen from: [4, 5, 6, 7, 9] seconds
+        const TEACHER_INTERVALS = [4, 5, 6, 7, 9];
+
+        // Chat URL variable (Embedded with exact share URL)
+        const DEFAULT_CHAT_URL = "https://share.gemini.google/FmGxyCItM8BG";
+        let chatUrl = localStorage.getItem('pelins_romance_chat_link') || DEFAULT_CHAT_URL;
+
+        let gameActive = false;
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('pelins_ romance_highscore') || '0');
+        let timeRemaining = GAME_DURATION;
+        let gameTimerInterval = null;
+
+        // Teacher States: "WRITING" (safe), "SUSPICIOUS" (warning), "WATCHING" (dangerous)
+        let teacherState = "WRITING"; 
+        let teacherTimer = null;
+
+        // Sound state
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        // Student Data
+        const MALE_NAMES = ["Ahmet", "Mehmet", "Can", "Burak", "Ege", "Kaan", "Mert", "Arda", "Deniz", "Eren", "Emre", "Barış", "Oğuz", "Cem", "Berk", "Tolga", "Sarp", "Umut"];
+        const MALE_AVATARS = ["👦🏻", "👦🏽", "👦🏼", "👨‍🦱", "👨‍🦰", "🏼‍♂️", "🏽‍♂️"];
+
+        let students = [];
+        let activeFlirtIndex = null;
+        let flirtProgress = 0; // 0 to 6 seconds
+        let flirtInterval = null;
+
+        // INITIALIZATION
+        window.onload = function() {
+            initStudents();
+            renderStudentsGrid();
+            document.getElementById("highScoreText").innerText = highScore;
+            syncChatLinkUI();
+        };
+
+        // CHAT LINK LOGIC
+        function syncChatLinkUI() {
+            const input = document.getElementById("chatUrlInput");
+            const anchor = document.getElementById("directChatAnchor");
+            input.value = chatUrl;
+            anchor.href = chatUrl;
+        }
+
+        function openChatLinkModal() {
+            syncChatLinkUI();
+            document.getElementById("chatLinkModal").classList.remove("hidden");
+        }
+
+        function openDirectChatLink() {
+            window.open(chatUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function closeChatLinkModal() {
+            document.getElementById("chatLinkModal").classList.add("hidden");
+        }
+
+        function editCustomChatUrl() {
+            const newUrl = prompt("Lütfen gitmek istediğiniz sohbet URL adresini girin:", chatUrl);
+            if (newUrl && newUrl.trim() !== "") {
+                chatUrl = newUrl.trim();
+                localStorage.setItem('pelins_romance_chat_link', chatUrl);
+                syncChatLinkUI();
+            }
+        }
+
+        function copyChatLink() {
+            const input = document.getElementById("chatUrlInput");
+            input.select();
+            document.execCommand('copy');
+            alert("Sohbet linki kopyalandı!");
+        }
+
+        // MODAL HANDLERS
+        function openHowToPlayModal() {
+            document.getElementById("howToPlayModal").classList.remove("hidden");
+        }
+
+        function closeHowToPlayModal() {
+            document.getElementById("howToPlayModal").classList.add("hidden");
+        }
+
+        // AUDIO SYNTHESIZER (Web Audio API - Offline Compatible)
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'heart') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'tick') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'alert') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(440, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'caught') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(554.37, now + 0.15);
+                    osc.frequency.setValueAtTime(659.25, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById("soundToggleBtn");
+            if (audioEnabled) {
+                btn.innerHTML = `<i class="fas fa-volume-up mr-1"></i> Ses: Açık`;
+                btn.classList.replace("bg-amber-900", "bg-amber-800");
+            } else {
+                btn.innerHTML = `<i class="fas fa-volume-mute mr-1"></i> Ses: Kapalı`;
+                btn.classList.replace("bg-amber-800", "bg-amber-900");
+            }
+        }
+
+        // GENERATE MALE STUDENTS
+        function createRandomStudent() {
+            const name = MALE_NAMES[Math.floor(Math.random() * MALE_NAMES.length)];
+            const avatar = MALE_AVATARS[Math.floor(Math.random() * MALE_AVATARS.length)];
+            return {
+                name: name,
+                avatar: avatar,
+                inLove: false
+            };
+        }
+
+        function initStudents() {
+            students = [];
+            for (let i = 0; i < TOTAL_DESKS; i++) {
+                students.push(createRandomStudent());
+            }
+        }
+
+        function renderStudentsGrid() {
+            const grid = document.getElementById("studentsGrid");
+            if (!grid) return;
+            grid.innerHTML = "";
+
+            students.forEach((student, index) => {
+                const desk = document.createElement("div");
+                desk.className = `relative bg-amber-100 rounded-xl border-2 ${activeFlirtIndex === index ? 'border-pink-500 ring-4 ring-pink-300' : 'border-amber-800'} p-3 flex flex-col items-center justify-between shadow-md select-none touch-none cursor-pointer transition transform active:scale-95`;
+                
+                // Event listeners for flirt interaction (mouse & touch)
+                desk.addEventListener("mousedown", (e) => startFlirting(index, e));
+                desk.addEventListener("mouseup", stopFlirting);
+                desk.addEventListener("mouseleave", stopFlirting);
+                desk.addEventListener("touchstart", (e) => { e.preventDefault(); startFlirting(index, e); });
+                desk.addEventListener("touchend", stopFlirting);
+
+                desk.innerHTML = `
+                    <!-- Progress Bar Container -->
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden border border-amber-900/20">
+                        <div id="progress-bar-${index}" class="bg-gradient-to-r from-pink-500 to-rose-500 h-2.5 rounded-full transition-all duration-100" style="width: ${student.inLove ? '100%' : (activeFlirtIndex === index ? (flirtProgress / FLIRT_REQUIRED_TIME) * 100 + '%' : '0%')}"></div>
+                    </div>
+
+                    <!-- Student Avatar -->
+                    <div class="relative w-14 h-14 bg-amber-200 rounded-full border-2 border-amber-800 flex items-center justify-center text-3xl shadow-inner">
+                        ${student.avatar}
+                        ${student.inLove ? `<span class="absolute -top-2 -right-2 text-xl animate-bounce">💖</span>` : ''}
+                    </div>
+
+                    <div class="mt-2 text-center">
+                        <span class="font-bold text-amber-950 text-sm block">${student.name}</span>
+                        <span class="text-[10px] font-bold ${student.inLove ? 'text-pink-600' : 'text-gray-500'}">
+                            ${student.inLove ? '❤️ AŞIK OLDU!' : 'Tıkla & Basılı Tut (6sn)'}
+                        </span>
+                    </div>
+                `;
+
+                grid.appendChild(desk);
+            });
+        }
+
+        // FLIRTING MECHANIC (6 SECONDS HOLD)
+        function startFlirting(index, event) {
+            if (!gameActive || students[index].inLove) return;
+
+            if (teacherState === "WATCHING") {
+                triggerCaught();
+                return;
+            }
+
+            activeFlirtIndex = index;
+            flirtProgress = 0;
+
+            renderStudentsGrid();
+
+            if (flirtInterval) clearInterval(flirtInterval);
+
+            flirtInterval = setInterval(() => {
+                if (teacherState === "WATCHING") {
+                    stopFlirting();
+                    triggerCaught();
+                    return;
+                }
+
+                flirtProgress += 0.2;
+                playSound('tick');
+
+                if (Math.random() > 0.5) {
+                    spawnHeartParticle(event);
+                }
+
+                const bar = document.getElementById(`progress-bar-${index}`);
+                if (bar) {
+                    const percentage = Math.min((flirtProgress / FLIRT_REQUIRED_TIME) * 100, 100);
+                    bar.style.width = `${percentage}%`;
+                }
+
+                if (flirtProgress >= FLIRT_REQUIRED_TIME) {
+                    stopFlirting();
+                    enamorStudent(index);
+                }
+            }, 200);
+        }
+
+        function stopFlirting() {
+            if (flirtInterval) {
+                clearInterval(flirtInterval);
+                flirtInterval = null;
+            }
+            activeFlirtIndex = null;
+            flirtProgress = 0;
+            renderStudentsGrid();
+        }
+
+        function enamorStudent(index) {
+            students[index].inLove = true;
+            score++;
+            document.getElementById("scoreText").innerText = score;
+            playSound('heart');
+
+            for(let i = 0; i < 8; i++) {
+                spawnHeartParticle(null, true);
+            }
+
+            renderStudentsGrid();
+
+            setTimeout(() => {
+                if (!gameActive) return;
+                students[index] = createRandomStudent();
+                renderStudentsGrid();
+            }, 1500);
+        }
+
+        function spawnHeartParticle(event, centerBurst = false) {
+            const heart = document.createElement("div");
+            heart.className = "heart-particle text-2xl z-50";
+            heart.innerText = ["💖", "💕", "💘", "❤️", "🌸"][Math.floor(Math.random() * 5)];
+
+            let posX, posY;
+            if (centerBurst || !event) {
+                posX = window.innerWidth / 2 + (Math.random() * 200 - 100);
+                posY = window.innerHeight / 2 + (Math.random() * 200 - 100);
+            } else {
+                posX = event.clientX || (event.touches && event.touches[0].clientX) || window.innerWidth / 2;
+                posY = event.clientY || (event.touches && event.touches[0].clientY) || window.innerHeight / 2;
+            }
+
+            heart.style.left = `${posX}px`;
+            heart.style.top = `${posY}px`;
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 1200);
+        }
+
+        // RANDOMIZED TEACHER BEHAVIOR PATTERN (STRICTLY 4, 5, 6, 7, OR 9 SECONDS)
+        function scheduleNextTeacherAction() {
+            if (!gameActive) return;
+
+            // Pick a random interval from [4, 5, 6, 7, 9] seconds
+            const randomSec = TEACHER_INTERVALS[Math.floor(Math.random() * TEACHER_INTERVALS.length)];
+            const writingTimeMs = randomSec * 1000;
+
+            teacherTimer = setTimeout(() => {
+                if (!gameActive) return;
+
+                // Step 1: Warning phase ('!' pops up for 1.5 seconds)
+                teacherState = "SUSPICIOUS";
+                updateTeacherUI();
+                playSound('alert');
+
+                setTimeout(() => {
+                    if (!gameActive) return;
+
+                    // Step 2: Teacher turns around and WATCHES for 2.5 - 3.5 seconds
+                    teacherState = "WATCHING";
+                    updateTeacherUI();
+
+                    if (activeFlirtIndex !== null) {
+                        stopFlirting();
+                        triggerCaught();
+                    }
+
+                    const watchingTime = Math.floor(Math.random() * 1000) + 2500;
+                    setTimeout(() => {
+                        if (!gameActive) return;
+
+                        // Step 3: Teacher turns back to chalkboard
+                        teacherState = "WRITING";
+                        updateTeacherUI();
+
+                        // Schedule next look interval
+                        scheduleNextTeacherAction();
+                    }, watchingTime);
+
+                }, 1500); // 1.5 second warning window
+
+            }, writingTimeMs);
+        }
+
+        function updateTeacherUI() {
+            const alertElem = document.getElementById("teacherAlert");
+            const headElem = document.getElementById("teacherHead");
+            const statusElem = document.getElementById("teacherStatusText");
+            const teacherContainer = document.getElementById("teacherContainer");
+
+            if (teacherState === "WRITING") {
+                alertElem.classList.add("hidden");
+                headElem.innerText = "👴";
+                teacherContainer.style.transform = "scale(1.1) rotate(0deg)";
+                statusElem.innerText = "Tahtaya Yazı Yazıyor...";
+                statusElem.className = "mt-1 text-xs font-bold px-2 py-0.5 rounded bg-emerald-600 text-white shadow";
+            } else if (teacherState === "SUSPICIOUS") {
+                alertElem.classList.remove("hidden");
+                headElem.innerText = "🧐";
+                teacherContainer.style.transform = "scale(1.15) rotate(-5deg)";
+                statusElem.innerText = "Şüpheleniyor! (!) ";
+                statusElem.className = "mt-1 text-xs font-bold px-2 py-0.5 rounded bg-amber-600 text-white shadow animate-pulse";
+            } else if (teacherState === "WATCHING") {
+                alertElem.classList.add("hidden");
+                headElem.innerText = "😡";
+                teacherContainer.style.transform = "scale(1.25) rotate(0deg)";
+                statusElem.innerText = "SINIFA BAKIYOR! (FLÖRT ETMEYİN!)";
+                statusElem.className = "mt-1 text-xs font-bold px-2 py-0.5 rounded bg-red-600 text-white shadow font-extrabold";
+            }
+        }
+
+        function triggerCaught() {
+            playSound('caught');
+            if (score > 0) score--;
+            document.getElementById("scoreText").innerText = score;
+            document.getElementById("caughtModal").classList.remove("hidden");
+        }
+
+        function closeCaughtModal() {
+            document.getElementById("caughtModal").classList.add("hidden");
+        }
+
+        // MAIN GAME TIMER & CONTROL
+        function startGame() {
+            gameActive = true;
+            score = 0;
+            timeRemaining = GAME_DURATION;
+
+            document.getElementById("scoreText").innerText = score;
+            document.getElementById("startOverlay").classList.add("hidden");
+            document.getElementById("gameOverOverlay").classList.add("hidden");
+            document.getElementById("caughtModal").classList.add("hidden");
+            document.getElementById("howToPlayModal").classList.add("hidden");
+            document.getElementById("chatLinkModal").classList.add("hidden");
+
+            initStudents();
+            renderStudentsGrid();
+
+            teacherState = "WRITING";
+            updateTeacherUI();
+
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            gameTimerInterval = setInterval(updateTimer, 1000);
+
+            if (teacherTimer) clearTimeout(teacherTimer);
+            scheduleNextTeacherAction();
+        }
+
+        function updateTimer() {
+            timeRemaining--;
+
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById("timerText").innerText = 
+                `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            if (timeRemaining <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimerInterval);
+            clearTimeout(teacherTimer);
+            stopFlirting();
+
+            playSound('win');
+
+            // High score check
+            let isNewHighScore = false;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('pelins_romance_highscore', highScore.toString());
+                document.getElementById("highScoreText").innerText = highScore;
+                isNewHighScore = true;
+            }
+
+            const highScoreNotice = document.getElementById("highScoreNotice");
+            if (isNewHighScore) {
+                highScoreNotice.classList.remove("hidden");
+            } else {
+                highScoreNotice.classList.add("hidden");
+            }
+
+            let rankTitle = "Lise Acemisi 😅";
+            let comment = "Biraz daha pratik yapmalısın!";
+            let badge = "💔";
+
+            if (score >= 25) {
+                rankTitle = "AŞK KRALİÇESİ 👑💖";
+                comment = "Tüm okul Pelin'in ayaklarına kapandı! Rekor kırdın!";
+                badge = "👑";
+            } else if (score >= 15) {
+                rankTitle = "Efsanevi Kalp Hırsızı 💘";
+                comment = "Sınıftaki erkeklerin aklı başından gitti!";
+                badge = "💖";
+            } else if (score >= 8) {
+                rankTitle = "Popüler Lise Güzeli 🌟";
+                comment = "Fena değil, okulda baya bir hayranın oluştu!";
+                badge = "✨";
+            }
+
+            document.getElementById("finalBadgeIcon").innerText = badge;
+            document.getElementById("finalRankTitle").innerText = rankTitle;
+            document.getElementById("finalScore").innerText = score;
+            document.getElementById("finalComment").innerText = `"${comment}"`;
+
+            document.getElementById("gameOverOverlay").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
